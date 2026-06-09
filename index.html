@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>도덕 학습지 · 선택과 행복</title>
+<style>
+  :root{
+    --ink:#14213d;
+    --ink-soft:#4a5578;
+    --paper:#fbf9f4;
+    --card:#ffffff;
+    --line:#e3dccd;
+    --accent:#e07a3f;       /* terracotta */
+    --accent-deep:#c45f28;
+    --pop:#2f6f6a;          /* teal */
+    --pop-soft:#e3efee;
+    --yes:#2f6f6a;
+    --no:#b04a3a;
+    --shadow:0 6px 22px rgba(20,33,61,.08);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Apple SD Gothic Neo','Pretendard','Malgun Gothic',system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.65;
+    padding-bottom:120px;
+    -webkit-text-size-adjust:100%;
+  }
+
+  /* ---------- top bar ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(251,249,244,.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .bar-inner{max-width:760px;margin:0 auto;padding:14px 20px 12px}
+  .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-deep);font-weight:700}
+  .title-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:2px}
+  h1{font-size:20px;margin:0;font-weight:800;letter-spacing:-.01em}
+  .progress-text{font-size:12px;color:var(--ink-soft);white-space:nowrap}
+  .track{height:6px;background:var(--line);border-radius:99px;margin-top:10px;overflow:hidden}
+  .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-deep));border-radius:99px;transition:width .4s ease}
+
+  /* ---------- worksheet switch ---------- */
+  .switch{display:flex;gap:8px;margin-top:12px}
+  .switch button{
+    flex:1;border:1.5px solid var(--line);background:var(--card);
+    color:var(--ink-soft);font-weight:700;font-size:13px;font-family:inherit;
+    padding:9px 6px;border-radius:12px;cursor:pointer;transition:.15s;
+  }
+  .switch button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  /* ---------- main ---------- */
+  main{max-width:760px;margin:0 auto;padding:18px 18px 0}
+  .lead{
+    background:var(--pop-soft);border:1px solid #cfe3e1;border-radius:var(--radius);
+    padding:16px 18px;margin:8px 0 20px;font-size:14.5px;color:#26544f;
+  }
+  .lead b{color:var(--pop)}
+
+  /* ---------- step card ---------- */
+  .step{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden;
+    opacity:.55;transition:opacity .3s;
+  }
+  .step.active{opacity:1}
+  .step-head{
+    display:flex;align-items:center;gap:12px;padding:16px 18px;cursor:pointer;
+  }
+  .num{
+    flex:none;width:34px;height:34px;border-radius:10px;background:var(--ink);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:14px;
+  }
+  .step.done .num{background:var(--pop)}
+  .step-head h2{font-size:16px;margin:0;font-weight:800;flex:1;letter-spacing:-.01em}
+  .stamp{
+    flex:none;font-size:11.5px;font-weight:700;color:var(--accent-deep);
+    background:#fbeadd;border:1px solid #f3d3bd;padding:3px 9px;border-radius:99px;white-space:nowrap;
+  }
+  .chev{flex:none;color:var(--ink-soft);transition:transform .25s;font-size:13px}
+  .step.open .chev{transform:rotate(180deg)}
+
+  .body{display:none;padding:0 18px 18px}
+  .step.open .body{display:block}
+
+  .cue{
+    display:flex;align-items:center;gap:8px;font-size:13px;color:var(--accent-deep);
+    background:#fdf3ea;border-radius:10px;padding:9px 12px;margin-bottom:14px;font-weight:600;
+  }
+  p{margin:0 0 12px}
+  .q{font-weight:600;margin:14px 0 8px}
+  .hint{font-size:13px;color:var(--ink-soft);font-style:italic;margin:-4px 0 10px}
+  .note{font-size:13.5px;color:var(--ink-soft);border-left:3px solid var(--line);padding:4px 0 4px 12px;margin:12px 0}
+
+  /* yes/no */
+  .yn{display:flex;gap:10px;margin:0 0 6px}
+  .yn button{
+    flex:1;border:1.5px solid var(--line);background:#fff;font-family:inherit;font-weight:700;
+    font-size:15px;padding:12px;border-radius:12px;cursor:pointer;color:var(--ink-soft);transition:.12s;
+  }
+  .yn button.sel-yes{background:var(--yes);border-color:var(--yes);color:#fff}
+  .yn button.sel-no{background:var(--no);border-color:var(--no);color:#fff}
+
+  .qline{padding:12px 0;border-bottom:1px dashed var(--line)}
+  .qline:last-child{border-bottom:none}
+  .qtext{font-size:14.5px;margin-bottom:9px}
+
+  /* counter */
+  .counter{font-size:14px;background:var(--pop-soft);border-radius:10px;padding:10px 14px;margin:10px 0;color:#26544f;font-weight:600}
+  .counter b{font-size:18px;color:var(--pop)}
+
+  /* fill blanks */
+  .blank{
+    display:inline-block;border:none;border-bottom:2px solid var(--accent);
+    background:transparent;font-family:inherit;font-size:15px;color:var(--accent-deep);font-weight:700;
+    min-width:90px;text-align:center;padding:2px 6px;
+  }
+  .blank:focus{outline:none;background:#fdf3ea;border-radius:6px 6px 0 0}
+  textarea{
+    width:100%;border:1.5px solid var(--line);border-radius:12px;background:#fcfbf7;
+    font-family:inherit;font-size:15px;color:var(--ink);padding:12px;resize:vertical;min-height:84px;line-height:1.6;
+  }
+  textarea:focus{outline:none;border-color:var(--accent);background:#fff}
+
+  /* choice pills (strategy / type) */
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
+  .pills button{
+    border:1.5px solid var(--line);background:#fff;font-family:inherit;font-weight:600;font-size:13.5px;
+    padding:9px 13px;border-radius:99px;cursor:pointer;color:var(--ink-soft);transition:.12s;
+  }
+  .pills button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  /* concept table */
+  .ctable{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:10px 0}
+  .crow{display:grid;grid-template-columns:1fr 2fr;border-bottom:1px solid var(--line)}
+  .crow:last-child{border-bottom:none}
+  .crow div{padding:11px 13px;font-size:13.5px}
+  .crow .c-left{background:#faf7f0;font-weight:700;border-right:1px solid var(--line);display:flex;align-items:center}
+
+  .reveal-btn{
+    background:none;border:1px dashed var(--pop);color:var(--pop);font-family:inherit;font-weight:700;
+    font-size:13px;padding:7px 12px;border-radius:10px;cursor:pointer;margin-top:6px;
+  }
+  .reveal{display:none;background:var(--pop-soft);border-radius:10px;padding:10px 13px;margin-top:8px;font-size:13.5px;color:#26544f}
+  .reveal.show{display:block}
+
+  .next{
+    width:100%;margin-top:8px;border:none;border-radius:12px;background:var(--ink);color:#fff;
+    font-family:inherit;font-weight:800;font-size:15px;padding:13px;cursor:pointer;
+  }
+  .next:disabled{background:var(--line);color:#999}
+
+  /* ---------- finish bar ---------- */
+  .footer-actions{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    background:rgba(251,249,244,.95);backdrop-filter:blur(8px);
+    border-top:1px solid var(--line);padding:12px 18px;
+    display:flex;gap:10px;max-width:760px;margin:0 auto;
+  }
+  .footer-actions button{
+    flex:1;border-radius:12px;font-family:inherit;font-weight:800;font-size:14px;padding:13px;cursor:pointer;border:none;
+  }
+  .save-btn{background:var(--pop);color:#fff}
+  .sheet-btn{background:var(--accent);color:#fff}
+  .dl-btn{background:#fff;border:1.5px solid var(--line)!important;color:var(--ink-soft);flex:none!important;width:54px;font-size:18px}
+  .reset-btn{background:#fff;border:1.5px solid var(--line)!important;color:var(--ink-soft);flex:none!important;width:54px}
+
+  .name-row{display:flex;gap:8px;margin:0 0 14px}
+  .name-row input,.name-row select{
+    border:1.5px solid var(--line);border-radius:10px;font-family:inherit;font-size:14px;padding:9px 11px;background:#fff;color:var(--ink);
+  }
+  .name-row select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%234a5578'/></svg>");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px}
+  .name-row select.cls{width:84px}.name-row select.no{width:90px}.name-row input.nm{flex:1}
+  .name-row input:focus,.name-row select:focus{outline:none;border-color:var(--accent)}
+
+  .toast{
+    position:fixed;bottom:86px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:11px 20px;border-radius:99px;font-size:13.5px;font-weight:600;
+    opacity:0;pointer-events:none;transition:.3s;z-index:70;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media(max-width:480px){
+    .crow{grid-template-columns:1fr}
+    .crow .c-left{border-right:none;border-bottom:1px solid var(--line)}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar-inner">
+    <div class="eyebrow">중학교 1학년 도덕</div>
+    <div class="title-row">
+      <h1 id="ws-title">내가 선택한 길을 최고로 만드는 방법</h1>
+      <span class="progress-text" id="ptext">0 / 5</span>
+    </div>
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <div class="switch">
+      <button id="tab1" class="on" onclick="switchWs(1)">① 선택의 역설</button>
+      <button id="tab2" onclick="switchWs(2)">② 돈과 행복</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="name-row">
+    <select class="cls" id="f-class"></select>
+    <select class="no" id="f-no"></select>
+    <input class="nm" id="f-name" placeholder="이름">
+  </div>
+
+  <div class="lead" id="lead"></div>
+  <div id="steps"></div>
+</main>
+
+<div class="footer-actions">
+  <button class="reset-btn" onclick="resetAll()" title="모두 지우기">↺</button>
+  <button class="save-btn" onclick="saveLocal()">저장하기</button>
+  <button class="sheet-btn" onclick="submitToSheet()">선생님께 제출</button>
+  <button class="dl-btn" onclick="downloadAnswers()" title="파일로도 받기">⤓</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ====================================================================
+   ▼▼▼ 선생님 설정: 아래 따옴표 안에 Apps Script 웹앱 주소를 붙여넣으세요 ▼▼▼
+   (설명서 파일을 보고 따라 하시면 됩니다. 비워두면 '파일 제출'만 동작해요.)
+==================================================================== */
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwuk51HG_Vrm70YqXhv5JwPCtWG_oVKKRchd9_rpdhn-64F0rz_Zr3ulEHzF5vtv0ZW/exec";
+/* ====================================================================
+   ▲▲▲ 여기까지만 바꾸면 됩니다. 아래 코드는 손대지 마세요. ▲▲▲
+==================================================================== */
+
+/* ============ DATA ============ */
+const WS = {
+  1:{
+    title:"내가 선택한 길을 최고로 만드는 방법",
+    lead:"유튜브 영상을 함께 보면서, <b>주황색 표시(⏱)</b>가 나오는 지점까지 보고 잠시 멈춘 뒤 활동을 채워요. 다 하면 다음 단계가 열립니다.",
+    steps:[
+      { t:"나의 선택 성향 진단", stamp:"⏱ 0:00 보고", type:"yesno",
+        cue:"영상 첫 부분, 4가지 질문을 따라 솔직하게 예/아니오로 답해 보세요.",
+        items:[
+          "넷플릭스·유튜브에서 볼 것을 고르다가 시간만 쓰고 포기한 적이 있다",
+          "괜찮은 사람인데도 100% 확신이 없어 사귀지 않은 적이 있다",
+          "맛집을 찾는다고 10분 넘게 리뷰를 검색한 적이 있다",
+          "최저가를 찾느라 결국 그날 물건을 못 산 적이 있다"
+        ],
+        counter:true },
+
+      { t:"나는 어떤 유형일까?", stamp:"⏱ ~0:42 보고", type:"concept",
+        cue:"심리학자 베리 슈워츠의 연구 결과를 보고 빈칸을 채워요.",
+        intro:"[예]가 많을수록 ‘극대화자’, 적을수록 ‘만족자’에 가깝습니다.",
+        table:[
+          ["[예] 많음","최고의 선택을 위해 모든 대안을 비교. 연봉은 높았지만 44%가 우울 증세를 보임"],
+          ["[예] 적음","적당한 기준을 넘으면 만족하고 선택. 우울 증세는 6%로 낮음"]
+        ],
+        blanks:[
+          {label:"극대화자 불행의 가장 큰 원인은?", ans:"후회"}
+        ],
+        pickQ:"나는 평소에 어느 쪽에 더 가까운가요?",
+        pick:["극대화자","만족자"],
+        write:"그렇게 생각한 내 일상의 경험을 적어보세요." },
+
+      { t:"잼 실험 — 선택지가 많으면?", stamp:"⏱ ~1:21 보고", type:"predict",
+        cue:"6가지 잼 코너 vs 24가지 잼 코너, 결과를 먼저 예상해 보세요.",
+        predictQ:"어느 코너에서 잼을 더 많이 샀을까요?",
+        predict:["6가지 코너","24가지 코너"],
+        result:"실제로는 6가지 코너에서 30%가, 24가지 코너에서는 단 3%만 잼을 샀어요. 선택지가 많을수록 뇌에 과부하가 걸려 결정을 미루게 됩니다.",
+        write:"왜 선택지가 많은데 오히려 못 샀을까요? 그때 사람들의 머릿속을 상상해 적어보세요.",
+        blanks:[{label:"선택지가 많을수록 만족 못 하는 현상은?", ans:"선택의 역설"}] },
+
+      { t:"가보지 않은 길의 함정", stamp:"⏱ ~3:04 보고", type:"counter",
+        cue:"친구의 인도 여행을 거절한 주인공 이야기를 보고 답해요.",
+        yn:"나는 무언가를 포기한 뒤, SNS를 보며 ‘그때 다르게 했다면…’ 후회한 적이 있다",
+        blanks:[{label:"가지 않은 길을 더 아름답게 보는 뇌의 착각은?", ans:"반사실적 사고"}],
+        write:"주인공이 진짜 인도에 갔다면 어떤 힘든 일이 있었을까요? (날씨·음식·다툼 등) 상상해 적어보세요.",
+        blanks2:[
+          {label:"하지 않은 일은 오직 (    ) 시나리오만 떠올린다", ans:"긍정적인"},
+          {label:"선택한 현실은 단점이 (    ) 보인다", ans:"선명하게"}
+        ] },
+
+      { t:"행복 제작자 되기", stamp:"⏱ ~4:30 보고", type:"strategy",
+        cue:"길버트 교수: ‘행복은 발견이 아니라 제작하는 것’. 만족자의 5가지 전략 중 하나를 골라요.",
+        blanks:[{label:"행복은 발견이 아니라 직접 (    )하는 것", ans:"제작"}],
+        pickQ:"나에게 가장 필요한 전략은?",
+        pick:["물리적 제약","배수의 진","스티브 잡스 결정법","이만하면 충분해","감사하기"],
+        write:"내가 고른 전략을 어떻게 실천할지 구체적으로 적어보세요." }
+    ]
+  },
+  2:{
+    title:"돈이 많으면 무조건 행복할까?",
+    lead:"이번 영상도 <b>주황색 표시(⏱)</b> 지점까지 보고 멈춘 뒤 활동을 채워요.",
+    steps:[
+      { t:"돈과 행복 생각 진단", stamp:"⏱ 0:00 보고", type:"yesno",
+        cue:"평소 나의 생각·경험과 맞는지 예/아니오로 답해 보세요.",
+        items:[
+          "새 물건을 가졌을 때의 행복감이 금방 무덤덤해진 적이 있다",
+          "친구가 더 좋은 걸 자랑하거나 SNS를 보면 내 것이 초라해 보인 적이 있다",
+          "돈이 아주 많아지기만 하면 무조건 행복해질 거라고 믿는다",
+          "남에게 선물·베풀었을 때가 나에게 썼을 때보다 더 좋았던 적이 있다"
+        ],
+        counter:true },
+
+      { t:"과학이 말하는 돈과 행복", stamp:"⏱ ~3:30 보고", type:"concept",
+        cue:"소득과 행복의 관계, 그리고 돈이 많아도 행복하지 않은 2가지 이유를 채워요.",
+        intro:"소득이 일정 수준을 넘으면 행복이 더 오르지 않거나 떨어집니다.",
+        blanks:[
+          {label:"돈이 더 이상 행복을 못 높이는 소득 수준은?", ans:"소득의 포만점"},
+          {label:"소득이 올라도 행복이 그대로인 현상(경제학자 이름)은?", ans:"이스터린의 역설"},
+          {label:"첫 번째 이유: 남과 나를 비교 →", ans:"사회적 비교"},
+          {label:"두 번째 이유: 익숙해져 감동이 사라짐 →", ans:"적응"}
+        ],
+        quote:[
+          {label:"행복은 기쁨의 (    )가 아니라", ans:"강도"},
+          {label:"기쁨의 (    )에 의해 결정된다 — 에드 디너", ans:"빈도"}
+        ] },
+
+      { t:"로또 100억의 함정", stamp:"⏱ ~6:09 보고", type:"counter",
+        cue:"‘오징어 게임’ 일남: 돈이 너무 없거나 너무 많으면 사는 게 시시해진다.",
+        write:"매일 최고급 음식·명품만 누리는 삶을 1년 반복하면 내 마음엔 어떤 변화가 생길까요? (맛·설렘·지루함) 상상해 적어보세요.",
+        blanks2:[
+          {label:"좋은 것도 매일 누리면 뇌는 금방 (    )한다", ans:"적응"},
+          {label:"물건을 사는 행복은 아주 (    )이다", ans:"단기적"}
+        ] },
+
+      { t:"돈으로 행복 사는 3가지 방법", stamp:"⏱ ~7:55 보고", type:"strategy",
+        cue:"행복은 ‘얼마 버느냐’가 아니라 ‘어떻게 쓰느냐’. 실천하고 싶은 방법을 골라요.",
+        pickQ:"내가 실천하고 싶은 방법은?",
+        pick:["물건 대신 ‘경험’ 사기","좋아하는 건 ‘특별한 날’에만","남을 위해 돈 쓰기(친사회적 지출)"],
+        write:"누구에게, 혹은 어떤 경험에 돈을 쓸지 구체적으로 적어보세요." }
+    ]
+  }
+};
+
+/* ============ STATE ============ */
+let cur=1;
+const KEY="moral_ws_v1";
+let store=load();
+
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+// note: localStorage may be unavailable in some sandboxes; wrapped in try/catch and kept in-memory too.
+let mem = store;
+
+/* ============ RENDER ============ */
+function render(){
+  const ws=WS[cur];
+  document.getElementById('ws-title').textContent=ws.title;
+  document.getElementById('lead').innerHTML=ws.lead;
+  document.getElementById('tab1').classList.toggle('on',cur===1);
+  document.getElementById('tab2').classList.toggle('on',cur===2);
+  const wrap=document.getElementById('steps');
+  wrap.innerHTML='';
+  ws.steps.forEach((s,i)=>wrap.appendChild(buildStep(s,i)));
+  refreshGate();
+  restore();
+}
+
+function buildStep(s,i){
+  const el=document.createElement('div');
+  el.className='step'; el.dataset.i=i;
+  if(i===0){el.classList.add('open');}
+  el.innerHTML=`
+    <div class="step-head" onclick="toggle(${i})">
+      <div class="num">${i+1}</div>
+      <h2>${s.t}</h2>
+      <span class="stamp">${s.stamp}</span>
+      <span class="chev">▼</span>
+    </div>
+    <div class="body">${stepBody(s,i)}</div>`;
+  return el;
+}
+
+function stepBody(s,i){
+  let h=`<div class="cue">⏱ ${s.cue}</div>`;
+  if(s.intro) h+=`<p class="note">${s.intro}</p>`;
+
+  if(s.type==="yesno"){
+    s.items.forEach((q,qi)=>{
+      h+=`<div class="qline"><div class="qtext">Q${qi+1}. ${q}</div>
+        <div class="yn" data-k="s${i}_yn${qi}">
+          <button onclick="ynPick(${i},${qi},'yes',this)">예</button>
+          <button onclick="ynPick(${i},${qi},'no',this)">아니오</button>
+        </div></div>`;
+    });
+    if(s.counter) h+=`<div class="counter">나의 <b>[예]</b> 개수: <b id="cnt${i}">0</b>개</div>`;
+  }
+
+  if(s.type==="concept"){
+    if(s.table){h+=`<div class="ctable">`;s.table.forEach(r=>{h+=`<div class="crow"><div class="c-left">${r[0]}</div><div>${r[1]}</div></div>`});h+=`</div>`;}
+    h+=blanksHTML(s.blanks,i,'b');
+    if(s.quote){h+=`<div class="note">💡 명언 빈칸</div>`+blanksHTML(s.quote,i,'q');}
+    if(s.pick){h+=pickHTML(s,i);}
+    if(s.write){h+=writeHTML(s.write,i);}
+  }
+
+  if(s.type==="predict"){
+    h+=`<p class="q">${s.predictQ}</p><div class="yn" data-k="s${i}_pred">`;
+    s.predict.forEach((p,pi)=>h+=`<button onclick="predPick(${i},${pi},this)">${p}</button>`);
+    h+=`</div>`;
+    h+=`<button class="reveal-btn" onclick="reveal(${i})">결과 확인하기</button>
+        <div class="reveal" id="rev${i}">${s.result}</div>`;
+    h+=writeHTML(s.write,i);
+    h+=blanksHTML(s.blanks,i,'b');
+  }
+
+  if(s.type==="counter"){
+    if(s.yn){h+=`<p class="q">${s.yn}</p>
+      <div class="yn" data-k="s${i}_yn0">
+        <button onclick="ynPick(${i},0,'yes',this)">예</button>
+        <button onclick="ynPick(${i},0,'no',this)">아니오</button></div>`;}
+    if(s.blanks) h+=blanksHTML(s.blanks,i,'b');
+    if(s.write) h+=writeHTML(s.write,i);
+    if(s.blanks2) h+=blanksHTML(s.blanks2,i,'b2');
+  }
+
+  if(s.type==="strategy"){
+    if(s.blanks) h+=blanksHTML(s.blanks,i,'b');
+    h+=pickHTML(s,i);
+    h+=writeHTML(s.write,i);
+  }
+
+  h+=`<button class="next" id="nx${i}" onclick="nextStep(${i})">완료하고 다음 ▾</button>`;
+  return h;
+}
+
+function blanksHTML(arr,i,tag){
+  let h='';
+  arr.forEach((b,bi)=>{
+    const input=`<input class="blank" data-k="s${i}_${tag}${bi}" data-ans="${b.ans}" oninput="saveField(this)" placeholder=" ">`;
+    if(/\(\s*\)/.test(b.label)){
+      // 문장 속 괄호 자리에 바로 입력칸을 넣음
+      const inline=b.label.replace(/\(\s*\)/, `(&nbsp;${input}&nbsp;)`);
+      h+=`<p class="q">${inline}</p>`;
+    }else{
+      h+=`<p class="q">${b.label} ${input.replace('placeholder=" "','placeholder="( 빈칸 )"')}</p>`;
+    }
+  });
+  return h;
+}
+function pickHTML(s,i){
+  let h=`<p class="q">${s.pickQ}</p><div class="pills" data-k="s${i}_pick">`;
+  s.pick.forEach((p,pi)=>h+=`<button onclick="pillPick(${i},${pi},this)">${p}</button>`);
+  return h+`</div>`;
+}
+function writeHTML(t,i){
+  return `<p class="q">✍️ ${t}</p>
+    <textarea data-k="s${i}_write" oninput="saveField(this)" placeholder="여기에 적어보세요"></textarea>`;
+}
+
+/* ============ INTERACTION ============ */
+function toggle(i){
+  const el=document.querySelector(`.step[data-i='${i}']`);
+  if(el.classList.contains('active')||el.classList.contains('done')||i===0||el.classList.contains('open'))
+    el.classList.toggle('open');
+}
+function ynPick(i,qi,v,btn){
+  const row=btn.parentElement; const k=row.dataset.k;
+  [...row.children].forEach(b=>b.classList.remove('sel-yes','sel-no'));
+  btn.classList.add(v==='yes'?'sel-yes':'sel-no');
+  mem[ck(k)]=v; persist();
+  updateCounter(i);
+}
+function predPick(i,pi,btn){
+  const row=btn.parentElement;
+  [...row.children].forEach(b=>b.classList.remove('sel-yes'));
+  btn.classList.add('sel-yes');
+  mem[ck(`s${i}_pred`)]=pi; persist();
+}
+function pillPick(i,pi,btn){
+  const row=btn.parentElement;
+  [...row.children].forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  mem[ck(`s${i}_pick`)]=pi; persist();
+}
+function reveal(i){document.getElementById('rev'+i).classList.add('show');}
+function saveField(inp){mem[ck(inp.dataset.k)]=inp.value;persist();}
+function updateCounter(i){
+  const el=document.getElementById('cnt'+i); if(!el)return;
+  let n=0; const ws=WS[cur].steps[i];
+  ws.items.forEach((_,qi)=>{if(mem[ck(`s${i}_yn${qi}`)]==='yes')n++;});
+  el.textContent=n;
+}
+function nextStep(i){
+  const el=document.querySelector(`.step[data-i='${i}']`);
+  el.classList.add('done'); el.classList.remove('open');
+  const nxt=document.querySelector(`.step[data-i='${i+1}']`);
+  if(nxt){nxt.classList.add('active','open');nxt.scrollIntoView({behavior:'smooth',block:'start'});}
+  else{toast('마지막 활동까지 완료했어요! 제출을 눌러주세요.');}
+  refreshGate();
+}
+function refreshGate(){
+  const steps=document.querySelectorAll('.step');
+  let done=0;
+  steps.forEach((el,idx)=>{
+    if(idx===0)el.classList.add('active');
+    if(el.classList.contains('done'))done++;
+  });
+  // unlock next of last done
+  steps.forEach((el,idx)=>{
+    if(el.classList.contains('done')&&steps[idx+1])steps[idx+1].classList.add('active');
+  });
+  const total=steps.length;
+  document.getElementById('ptext').textContent=`${done} / ${total}`;
+  document.getElementById('fill').style.width=(done/total*100)+'%';
+}
+
+/* ============ PERSISTENCE ============ */
+function ck(k){return `ws${cur}_${k}`;}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(mem));}catch(e){}}
+function restore(){
+  document.querySelectorAll('[data-k]').forEach(node=>{
+    const k=ck(node.dataset.k); const v=mem[k];
+    if(v===undefined||v===null)return;
+    if(node.tagName==='INPUT'&&node.classList.contains('blank')){node.value=v;}
+    else if(node.tagName==='TEXTAREA'){node.value=v;}
+    else if(node.classList.contains('yn')){
+      const btns=node.children;
+      if(v==='yes')btns[0].classList.add('sel-yes');
+      if(v==='no')btns[1].classList.add('sel-no');
+    } else if(node.classList.contains('pills')){
+      if(node.children[v])node.children[v].classList.add('on');
+    } else if(node.dataset.k.endsWith('_pred')){
+      if(node.children[v])node.children[v].classList.add('sel-yes');
+    }
+  });
+  // name fields (shared)
+  ['f-class','f-no','f-name'].forEach(id=>{if(mem[id])document.getElementById(id).value=mem[id];});
+  WS[cur].steps.forEach((_,i)=>updateCounter(i));
+}
+['f-class','f-no','f-name'].forEach(id=>{
+  document.addEventListener('input',e=>{if(e.target.id===id){mem[id]=e.target.value;persist();}});
+  document.addEventListener('change',e=>{if(e.target.id===id){mem[id]=e.target.value;persist();}});
+});
+
+/* 반 1~9, 번호 1~35 드롭다운 채우기 */
+(function fillSelects(){
+  const cls=document.getElementById('f-class');
+  const no=document.getElementById('f-no');
+  cls.innerHTML='<option value="">반</option>';
+  for(let i=1;i<=9;i++)cls.innerHTML+=`<option value="${i}">${i}반</option>`;
+  no.innerHTML='<option value="">번호</option>';
+  for(let i=1;i<=35;i++)no.innerHTML+=`<option value="${i}">${i}번</option>`;
+  if(mem['f-class'])cls.value=mem['f-class'];
+  if(mem['f-no'])no.value=mem['f-no'];
+})();
+
+/* ============ SWITCH / RESET ============ */
+function switchWs(n){if(n===cur)return;cur=n;render();window.scrollTo({top:0,behavior:'smooth'});}
+function resetAll(){
+  if(!confirm('이 학습지의 입력 내용을 모두 지울까요?'))return;
+  Object.keys(mem).forEach(k=>{if(k.startsWith(`ws${cur}_`))delete mem[k];});
+  persist();render();toast('지웠어요');
+}
+
+/* ============ TOAST ============ */
+let tT;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* ============ SAVE / DOWNLOAD / SUBMIT ============ */
+function saveLocal(){persist();toast('저장했어요 ✓ (이 기기에 보관)');}
+
+/* 답안을 사람이 읽기 좋은 텍스트로 만들기 */
+function buildText(){
+  const nm=mem['f-name']||'이름없음';
+  const cls=mem['f-class']||'';const no=mem['f-no']||'';
+  let out=`중학교 1학년 도덕 학습지 — 학생 답안\n`;
+  out+=`${cls}반 ${no}번 / 이름: ${nm}\n`;
+  out+=`작성일: ${new Date().toLocaleString('ko-KR')}\n`;
+  out+=`${'='.repeat(40)}\n`;
+  [1,2].forEach(w=>{
+    out+=`\n■ 학습지 ${w==1?'①':'②'} ${WS[w].title}\n`;
+    WS[w].steps.forEach((s,i)=>{
+      out+=`\n[활동 ${i+1}] ${s.t}\n`;
+      const g=k=>mem[`ws${w}_s${i}_${k}`];
+      if(s.type==='yesno'){
+        s.items.forEach((q,qi)=>{const v=g(`yn${qi}`);out+=`  Q${qi+1}. ${v==='yes'?'예':v==='no'?'아니오':'-'}\n`;});
+      }
+      ['b','b2','q'].forEach(tag=>{
+        let bi=0;while(bi<10){const v=mem[`ws${w}_s${i}_${tag}${bi}`];if(v!==undefined&&v!=='')out+=`  · 빈칸: ${v}\n`;bi++;}
+      });
+      const pred=g('pred');if(pred!==undefined&&s.predict)out+=`  · 예상: ${s.predict[pred]}\n`;
+      const yn0=g('yn0');if(yn0&&s.type==='counter')out+=`  · 체크: ${yn0==='yes'?'예':'아니오'}\n`;
+      const pk=g('pick');if(pk!==undefined&&s.pick)out+=`  · 선택: ${s.pick[pk]}\n`;
+      const wr=g('write');if(wr)out+=`  · 서술: ${wr}\n`;
+    });
+  });
+  return out;
+}
+
+function downloadAnswers(){
+  const nm=mem['f-name']||'이름없음';
+  const cls=mem['f-class']||'';const no=mem['f-no']||'';
+  const blob=new Blob([buildText()],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`도덕학습지_${cls}반${no}번_${nm}.txt`;
+  document.body.appendChild(a);a.click();a.remove();
+  toast('답안 파일을 내려받았어요 ✓');
+}
+
+/* 선생님 구글 시트로 전송 */
+function submitToSheet(){
+  const nm=(mem['f-name']||'').trim();
+  if(!nm){toast('먼저 이름을 적어주세요');document.getElementById('f-name').focus();return;}
+  if(!SHEET_URL){
+    toast('전송 주소가 없어 파일로 받을게요');
+    downloadAnswers();return;
+  }
+  const payload={
+    반:mem['f-class']||'', 번호:mem['f-no']||'', 이름:nm,
+    제출시각:new Date().toLocaleString('ko-KR'),
+    답안:buildText()
+  };
+  const btn=document.querySelector('.sheet-btn');
+  const old=btn.textContent; btn.textContent='보내는 중…'; btn.disabled=true;
+  fetch(SHEET_URL,{
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(payload)
+  }).then(()=>{
+    toast('제출 완료! 선생님께 전송했어요 ✓');
+  }).catch(()=>{
+    toast('전송이 안 돼 파일로 받을게요');downloadAnswers();
+  }).finally(()=>{
+    btn.textContent=old; btn.disabled=false;
+  });
+}
+
+render();
+</script>
+</body>
+</html>
