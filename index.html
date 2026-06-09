@@ -234,7 +234,7 @@
    ▼▼▼ 선생님 설정: 아래 따옴표 안에 Apps Script 웹앱 주소를 붙여넣으세요 ▼▼▼
    (설명서 파일을 보고 따라 하시면 됩니다. 비워두면 '파일 제출'만 동작해요.)
 ==================================================================== */
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbwuk51HG_Vrm70YqXhv5JwPCtWG_oVKKRchd9_rpdhn-64F0rz_Zr3ulEHzF5vtv0ZW/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwISVnvFt9MNLjvsl8bU-HgQHKuLAJo-3W6nThyqlSkoPjK5_N7GgqgDtOD7KCjoxMd/exec";
 /* ====================================================================
    ▲▲▲ 여기까지만 바꾸면 됩니다. 아래 코드는 손대지 마세요. ▲▲▲
 ==================================================================== */
@@ -595,6 +595,45 @@ function buildText(){
   return out;
 }
 
+/* 답을 항목별로 쪼개 [제목배열, 값배열]로 만들기 (시트 한 칸당 한 답) */
+function buildColumns(){
+  const headers=['제출시각','반','번호','이름'];
+  const values=[
+    new Date().toLocaleString('ko-KR'),
+    mem['f-class']||'', mem['f-no']||'', (mem['f-name']||'').trim()
+  ];
+  [1,2].forEach(w=>{
+    const tag=w==1?'①':'②';
+    WS[w].steps.forEach((s,i)=>{
+      const g=k=>mem[`ws${w}_s${i}_${k}`];
+      const head=p=>`${tag}-활동${i+1} ${p}`;
+      if(s.type==='yesno'){
+        s.items.forEach((_,qi)=>{
+          const v=g(`yn${qi}`);
+          headers.push(head(`Q${qi+1}`));
+          values.push(v==='yes'?'예':v==='no'?'아니오':'');
+        });
+      }
+      ['b','b2','q'].forEach(t2=>{
+        for(let bi=0;bi<10;bi++){
+          const k=`s${i}_${t2}${bi}`, v=mem[`ws${w}_${k}`];
+          // 해당 빈칸이 실제로 존재하는지 데이터 정의로 확인
+          const arr = t2==='b'?s.blanks : t2==='b2'?s.blanks2 : s.quote;
+          if(arr&&arr[bi]){
+            headers.push(head('빈칸: '+arr[bi].label.replace(/\(\s*\)/,'( )')));
+            values.push(v||'');
+          }
+        }
+      });
+      if(s.predict){const pr=g('pred');headers.push(head('예상'));values.push(pr!==undefined?s.predict[pr]:'');}
+      if(s.type==='counter'&&s.yn){const y=g('yn0');headers.push(head('체크'));values.push(y==='yes'?'예':y==='no'?'아니오':'');}
+      if(s.pick){const pk=g('pick');headers.push(head('선택'));values.push(pk!==undefined?s.pick[pk]:'');}
+      if(s.write){headers.push(head('서술'));values.push(g('write')||'');}
+    });
+  });
+  return {headers,values};
+}
+
 function downloadAnswers(){
   const nm=mem['f-name']||'이름없음';
   const cls=mem['f-class']||'';const no=mem['f-no']||'';
@@ -614,10 +653,13 @@ function submitToSheet(){
     toast('전송 주소가 없어 파일로 받을게요');
     downloadAnswers();return;
   }
+  const col=buildColumns();
   const payload={
     반:mem['f-class']||'', 번호:mem['f-no']||'', 이름:nm,
     제출시각:new Date().toLocaleString('ko-KR'),
-    답안:buildText()
+    답안:buildText(),
+    headers:col.headers,
+    values:col.values
   };
   const btn=document.querySelector('.sheet-btn');
   const old=btn.textContent; btn.textContent='보내는 중…'; btn.disabled=true;
